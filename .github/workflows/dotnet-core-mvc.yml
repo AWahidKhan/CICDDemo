@@ -1,0 +1,39 @@
+name: Build & Publish ASP.NET Core MVC
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      # 1️⃣ Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'   # change if needed
+
+      # 3️⃣ Restore NuGet packages
+      - name: Restore
+        run: dotnet restore
+
+      # 4️⃣ Build
+      - name: Build
+        run: dotnet build -c Release --no-restore
+
+      # 5️⃣ Publish (THIS is what you want)
+      - name: Publish
+        run: dotnet publish -c Release -o publish
+
+      # 6️⃣ Upload publish output
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-output
+          path: publish
