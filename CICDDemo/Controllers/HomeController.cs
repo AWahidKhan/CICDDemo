@@ -15,6 +15,7 @@ namespace CICDDemo.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.Message = "Welcome to the CICD Demo Application!";
             return View();
         }
 
