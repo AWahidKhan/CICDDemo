@@ -1,11 +1,13 @@
-name: Build & Publish ASP.NET Core MVC
+name: Build, SAST & Publish ASP.NET Core MVC
 
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
-  publish:
+  build-sast-publish:
     runs-on: windows-latest
 
     steps:
@@ -13,25 +15,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup .NET SDK
+      # 2️⃣ Initialize CodeQL (SAST)
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+
+      # 3️⃣ Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'   # change if needed
+          dotnet-version: '8.0.x'
 
-      # 3️⃣ Restore NuGet packages
+      # 4️⃣ Restore NuGet packages
       - name: Restore
         run: dotnet restore
 
-      # 4️⃣ Build
+      # 5️⃣ Build (required for accurate SAST)
       - name: Build
         run: dotnet build -c Release --no-restore
 
-      # 5️⃣ Publish (THIS is what you want)
+      # 6️⃣ Run CodeQL Analysis (SAST)
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      # 7️⃣ Publish
       - name: Publish
         run: dotnet publish -c Release -o publish
 
-      # 6️⃣ Upload publish output
+      # 8️⃣ Upload publish output
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
         with:
